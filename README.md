@@ -1,15 +1,25 @@
 # Excelerate
 Fast C# library for creating .xlsx files.
 
+# Current State
+
+BETA - as of 5/10/22, it's been writing valid xlsx files for all of 2 days now. I'll continue to build out the missing functionality as well as add more examples, tests and a benchmark.
+
+# Goal
+
+I want to be clear that Excelerate is not meant to be a general purpose .xlsx library. There are plenty of libraries that fill this role more than adequately. 
+
+Instead, Excelerate is meant to provide a library that is suitable for writing very large spreadsheets (hundreds of thousands to millions of rows... a niche requirement) with some formatting, styling and worksheet manipulation.
+
 # Features
 
 - Fast writing of Excel .xlsx files.
-- Supports adding worksheets
-- Supports addeding fonts and styles (colors, fills, etc)
+- Supports adding, renaming and removing worksheets
+- Supports adding fonts and styles (colors, fills, etc)
 
 # Notes
 
-The idea for this project came from the FastExcel library which is VERY fast at writing Excel files, but also extremely limited (no ability to add new worksheets, not colors or fonts, etc).
+The idea for this project came from the FastExcel library which is VERY fast at writing Excel files, but also extremely limited (no ability to add new worksheets, no colors or fonts, etc).
 
 Most of the other Excel libraries out there utilize the OpenXML libraries, which limits the speed of populating and writing large Excel files. 
 
