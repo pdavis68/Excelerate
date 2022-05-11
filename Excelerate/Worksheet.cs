@@ -156,9 +156,10 @@ namespace Excelerate
             int style = 0;
             if (val is CellData)
             {
-                style = (val as CellData).CellXfsId;
-                val = (val as CellData).Value;
-                if (val is string)
+                var cd = (val as CellData);
+                style = cd.CellXfsId;
+                val = cd.Value;
+                if (val is string && !cd.IsSharedString)
                 {
                     val = _workbook.Document.Sharedstrings.AddString(val as string).ToString();
                 }

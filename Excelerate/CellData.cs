@@ -14,6 +14,8 @@ namespace Excelerate
             Value = value;
         }
 
+        public bool IsSharedString { get; set; } = false;
+
         public object Value { get; init; }
         public int CellXfsId { get; set; }
     }

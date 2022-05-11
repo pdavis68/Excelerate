@@ -9,18 +9,33 @@ namespace Excelerate
     public class SharedStrings
     {
         private object _lockOb = new Object();
-        private List<SharedString> _sharedStrings = new List<SharedString>();
+        private List<SharedStringBase> _sharedStrings = new List<SharedStringBase>();
 
         public SharedStrings()
         {
 
+        }
+        public int AddString(SharedStringBase ssb)
+        {
+            int loc = _sharedStrings.Count;
+            var existing = _sharedStrings.FirstOrDefault(p => p.Equals(ssb));
+            if (existing != null)
+            {
+                existing.References++;
+                return _sharedStrings.IndexOf(existing);
+            }
+            else
+            {
+                _sharedStrings.Add(ssb);
+                return loc;
+            }
         }
 
         public int AddString(string newString)
         {
             lock(_lockOb)
             {
-                var ss = _sharedStrings.FirstOrDefault(p=>p.Value == newString);
+                var ss = _sharedStrings.FirstOrDefault(p=>(p is SharedString) && ((p as SharedString).Value == newString));
                 if (ss != null)
                 {
                     ss.References++;
@@ -35,33 +50,12 @@ namespace Excelerate
             }
         }
 
-        public string GetString(int stringIndex)
-        {
-            return _sharedStrings[stringIndex].Value;
-        }
-
-        public void RemoveString(string newString)
-        {
-            lock(_lockOb)
-            {
-                var ss = _sharedStrings.FirstOrDefault(p=>p.Value == newString);
-                if (ss != null)
-                {
-                    if (ss.References == 1)
-                    {
-                        _sharedStrings.Remove(ss);
-                        return;
-                    }
-                    ss.References--;
-                }
-            }
-        }
 
         public int GetStringReference(string strToTest)
         {
             lock(_lockOb)
             {
-                var ss = _sharedStrings.FirstOrDefault(p=>p.Value == strToTest);
+                var ss = _sharedStrings.FirstOrDefault(p => (p is SharedString) && ((p as SharedString).Value == strToTest));
                 if (ss == null)
                 {
                     return -1;
@@ -79,20 +73,20 @@ namespace Excelerate
             xml += $"<sst xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" count=\"{totalCount}\" uniqueCount=\"{uniqueCount}\">";
             foreach(var ss in _sharedStrings)
             {
-                if (string.IsNullOrEmpty(ss.Value))
+                if (ss is SharedString && string.IsNullOrEmpty((ss as SharedString).Value))
                 {
                     xml += $"<si><t/></si>";
                 }
                 else
                 {
-                    xml += $"<si><t>{HttpUtility.HtmlEncode(ss.Value)}</t></si>";
+                    xml += ss.GenerateSharedStringXml();
                 }
             }
             xml += "</sst>";
             return xml;
         }
 
-        private class SharedString
+        public class SharedString : SharedStringBase
         {
             internal SharedString(string value) 
             {
@@ -100,8 +94,6 @@ namespace Excelerate
                 References = 1;
             }
             public string Value { get; set; }
-            public int References { get; set; }
-
 
             public override bool Equals(object obj)
             {
@@ -114,6 +106,11 @@ namespace Excelerate
                     }
                 }
                 return false;
+            }
+
+            internal override string GenerateSharedStringXml()
+            {
+                return $"<si><t>{HttpUtility.HtmlEncode(Value)}</t></si>";
             }
 
             public override int GetHashCode()
